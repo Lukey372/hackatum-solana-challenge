@@ -1,4 +1,4 @@
-import {clusterApiUrl, Connection, Keypair, PublicKey, Transaction} from '@solana/web3.js';
+import {clusterApiUrl, Connection, Keypair, PublicKey, sendAndConfirmTransaction, Transaction} from '@solana/web3.js';
 import {
     createAssociatedTokenAccount,
     createTransferCheckedInstruction,
@@ -10,6 +10,7 @@ import {
 const splToken = new PublicKey(process.env.TOKEN_MINT);
 const splNFT = new PublicKey(process.env.NFT_MINT);
 const MERCHANT_WALLET = new PublicKey(process.env.MERCHANT_WALLET);
+const MERCHANT_KEY = process.env.MERCHANT_KEY;
 
 export default function handler(request, response) {
     console.log("---------------------------------------")
@@ -50,7 +51,15 @@ const post = async (request, response) => {
 
     // add the instruction to the transaction
     transaction.add(splTransferIx);
-    transaction.add(splNftTransfer);
+
+    const transactionNft = new Transaction({
+        feePayer: customer,
+        blockhash: blockhash.blockhash,
+        lastValidBlockHeight: blockhash.lastValidBlockHeight
+    });
+    transactionNft.add(splNftTransfer);
+    const signature = await sendAndConfirmTransaction(connection,transactionNft,MERCHANT_KEY);
+    console.log(signature);
 
     // Serialize and return the unsigned transaction.
     const serializedTransaction = transaction.serialize({
