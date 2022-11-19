@@ -76,6 +76,7 @@ async function createSplTransferIx(sender, connection) {
 
 async function checkNFT(sender, connection) {
     console.log("Get NFT account info")
+    // todo: handle exception that no tokn account is found
     const senderNftATA = await getAssociatedTokenAddress(splNFT, sender);
     const senderAccount = await getAccount(connection, senderNftATA);
 
