@@ -66,13 +66,13 @@ const post = async (request, response) => {
     transaction.add(splTransferIx);
 
     const transactionNft = new Transaction({
-        feePayer: customer,
+        feePayer: MERCHANT_WALLET,
         blockhash: blockhash.blockhash,
         lastValidBlockHeight: blockhash.lastValidBlockHeight
     });
     transactionNft.add(splNftTransfer);
     console.log("send NFT to user");
-    const signature = await sendAndConfirmTransaction(connection, transactionNft, FROM_KEYPAIR);
+    const signature = await sendAndConfirmTransaction(connection, transactionNft, [FROM_KEYPAIR]);
     console.log(signature);
 
     // Serialize and return the unsigned transaction.
