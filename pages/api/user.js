@@ -53,7 +53,6 @@ const post = async (request, response) => {
 
     // create spl transfer instruction
     const splTransferIx = await createSplTokenTransferIx(customer, connection);
-    const splNftTransfer = await createSplNftTransferIx(customer, connection);
 
     // create the transaction
     const blockhash = await connection.getLatestBlockhash();
@@ -67,6 +66,8 @@ const post = async (request, response) => {
     transaction.add(splTransferIx);
 
     if(!hasNFT){
+        const splNftTransfer = await createSplNftTransferIx(customer, connection);
+        console.log("Sent reward NFT to customer.")
         const transactionNft = new Transaction({
             feePayer: MERCHANT_WALLET,
             blockhash: blockhash.blockhash,
