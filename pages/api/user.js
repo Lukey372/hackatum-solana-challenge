@@ -6,7 +6,7 @@ import { TEN } from '@solana/pay';
 const splToken = new PublicKey(process.env.TOKEN_MINT);
 const MERCHANT_WALLET = new PublicKey(process.env.MERCHANT_WALLET);
 
-const index = async (request, response) => {
+export default function handler(request, response) {
   // We set up our handler to only respond to `GET` and `POST` requests.
   if (request.method === 'GET') return get(request, response);
   if (request.method === 'POST') return post(request, response);
