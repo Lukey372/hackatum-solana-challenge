@@ -1,5 +1,11 @@
 import {clusterApiUrl, Connection, Keypair, PublicKey, Transaction} from '@solana/web3.js';
-import {createTransferCheckedInstruction, getAccount, getAssociatedTokenAddress, getMint} from '@solana/spl-token';
+import {
+    createAssociatedTokenAccount,
+    createTransferCheckedInstruction,
+    getAccount,
+    getAssociatedTokenAddress,
+    getMint
+} from '@solana/spl-token';
 
 const splToken = new PublicKey(process.env.TOKEN_MINT);
 const splNFT = new PublicKey(process.env.NFT_MINT);
@@ -76,15 +82,18 @@ async function createSplTransferIx(sender, connection) {
 
 async function checkNFT(sender, connection) {
     console.log("Get NFT account info")
-    // todo: handle exception that no tokn account is found
-    const senderNftATA = await getAssociatedTokenAddress(splNFT, sender);
-    const senderAccount = await getAccount(connection, senderNftATA);
+    // handle exception that no token account is found
+    try {
+        const senderNftATA = await getAssociatedTokenAddress(splNFT, sender);
+        const senderAccount = await getAccount(connection, senderNftATA);
 
-    console.log("Check if mint is valid")
-    const mintNFT = await getMint(connection, splNFT);
-    if (!mintNFT.isInitialized) throw new Error('mint not initialized');
-
-    return senderAccount.amount > 0;
+        console.log("Check if mint is valid")
+        const mintNFT = await getMint(connection, splNFT);
+        if (!mintNFT.isInitialized) throw new Error('mint not initialized');
+        return senderAccount.amount > 0;
+    } catch (e){
+        return false;
+    }
 }
 
 async function payWithNft(sender, connection) {
@@ -100,7 +109,17 @@ async function payWithNft(sender, connection) {
     if (senderNftAccount.isFrozen) throw new Error('sender frozen');
 
     // Get the merchant's ATA and check that the account exists and can receive tokens
-    const merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
+    let merchantNftATA;
+    try {
+        merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
+    } catch (e){
+        merchantNftATA = await createAssociatedTokenAccount(
+            connection, // connection
+            MERCHANT_WALLET, // fee payer
+            splNFT, // mint
+            MERCHANT_WALLET // owner,
+        );
+    }
     console.log("Merchant NFT ATA: " + merchantNftATA)
     const merchantNftAccount = await getAccount(connection, merchantNftATA);
     if (!merchantNftAccount.isInitialized) throw new Error('merchant not initialized');
