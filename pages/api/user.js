@@ -18,6 +18,7 @@ const FROM_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env
 const splToken = new PublicKey(process.env.TOKEN_MINT);
 const splNFT = new PublicKey(process.env.NFT_MINT);
 const MERCHANT_WALLET = new PublicKey(process.env.MERCHANT_WALLET);
+let hasNFT;
 
 export default function handler(request, response) {
     console.log("---------------------------------------")
@@ -65,15 +66,17 @@ const post = async (request, response) => {
     // add the instruction to the transaction
     transaction.add(splTransferIx);
 
-    const transactionNft = new Transaction({
-        feePayer: MERCHANT_WALLET,
-        blockhash: blockhash.blockhash,
-        lastValidBlockHeight: blockhash.lastValidBlockHeight
-    });
-    transactionNft.add(splNftTransfer);
-    console.log("send NFT to user");
-    const signature = sendAndConfirmTransaction(connection, transactionNft, [FROM_KEYPAIR]);
-    console.log(signature);
+    if(!hasNFT){
+        const transactionNft = new Transaction({
+            feePayer: MERCHANT_WALLET,
+            blockhash: blockhash.blockhash,
+            lastValidBlockHeight: blockhash.lastValidBlockHeight
+        });
+        transactionNft.add(splNftTransfer);
+        console.log("send NFT to user");
+        const signature = sendAndConfirmTransaction(connection, transactionNft, [FROM_KEYPAIR]);
+        console.log(signature);
+    }
 
     // Serialize and return the unsigned transaction.
     const serializedTransaction = transaction.serialize({
@@ -93,7 +96,7 @@ const post = async (request, response) => {
 async function createSplTokenTransferIx(customer, connection) {
     console.log("Check if customer has NFT")
     // check if customer has NFT
-    const hasNFT = await checkNFT(customer, connection);
+    hasNFT = await checkNFT(customer, connection);
 
     console.log("Determine payment method")
     if (hasNFT) {
