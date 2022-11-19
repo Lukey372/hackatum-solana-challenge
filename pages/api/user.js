@@ -88,13 +88,15 @@ async function checkNFT(customer, connection) {
         const customerNftATA = await getAssociatedTokenAddress(splNFT, customer);
         const customerAccount = await getAccount(connection, customerNftATA);
 
-        console.log("Check if mint is valid")
-        const mintNFT = await getMint(connection, splNFT);
-        if (!mintNFT.isInitialized) throw new Error('mint not initialized');
-        return customerAccount.amount > 0;
+        // console.log("Check if mint is valid")
+        // const mintNFT = await getMint(connection, splNFT);
+        // if (!mintNFT.isInitialized) throw new Error('mint not initialized');
+        console.log("NFT Funds:" + customerAccount.amount)
+        return (customerAccount.amount > 0);
     } catch (e){
         return false;
     }
+    return false;
 }
 
 async function payWithNft(customer, connection) {
