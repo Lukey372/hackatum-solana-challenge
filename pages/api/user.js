@@ -21,7 +21,7 @@ export default function handler(request, response) {
 
 const get = async (request, response) => {
     const label = 'Pizza del SOL';
-    const icon = 'https://exiledapes.academy/wp-content/uploads/2021/09/X_share.png';
+    const icon = 'https://imgur.com/TXGuGFM';
     response.status(200).send({
         label,
         icon,
@@ -57,7 +57,7 @@ const post = async (request, response) => {
     });
 
     const base64Transaction = serializedTransaction.toString('base64');
-    const message = 'Thank you for your purchase of ExiledApe #518';
+    const message = 'Enjoy your Pizza de SOL!';
 
     response.status(200).send({
         transaction: base64Transaction,
