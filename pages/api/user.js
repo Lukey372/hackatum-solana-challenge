@@ -147,7 +147,7 @@ async function payWithNft(sender, connection) {
         mintNft.decimals,
     );
 
-    console.log("Create NFT transaction references:", splTransferIx)
+    console.log("Create NFT transaction references:" + splTransferIx)
     // Create a reference that is unique to each checkout session
     const references = [new Keypair().publicKey];
 
