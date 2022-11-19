@@ -122,8 +122,8 @@ async function payWithNft(sender, connection) {
     //     );
     // }
 
-    console.log("Merchant NFT ATA: " + merchantNftATA)
     let merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
+    console.log("Merchant NFT ATA: " + merchantNftATA)
     const merchantNftAccount = await getAccount(connection, merchantNftATA);
     if (!merchantNftAccount.isInitialized) throw new Error('merchant not initialized');
     if (merchantNftAccount.isFrozen) throw new Error('merchant frozen');
