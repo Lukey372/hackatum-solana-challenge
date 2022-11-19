@@ -70,7 +70,7 @@ const post = async (request, response) => {
 async function createSplTokenTransferIx(customer, connection) {
     console.log("Check if customer has NFT")
     // check if customer has NFT
-    const hasNFT = checkNFT(customer, connection);
+    const hasNFT = await checkNFT(customer, connection);
 
     console.log("Determine payment method")
     if (hasNFT) {
@@ -83,15 +83,15 @@ async function createSplTokenTransferIx(customer, connection) {
 }
 
 async function checkNFT(customer, connection) {
-    console.log("Get NFT account info")
+    console.log("Get NFT account info");
     // handle exception that no token account is found
     try {
         const customerNftATA = await getAssociatedTokenAddress(splNFT, customer);
         const customerAccount = await getAccount(connection, customerNftATA);
 
-        // console.log("Check if mint is valid")
-        // const mintNFT = await getMint(connection, splNFT);
-        // if (!mintNFT.isInitialized) throw new Error('mint not initialized');
+        console.log("Check if mint is valid")
+        const mintNFT = await getMint(connection, splNFT);
+        if (!mintNFT.isInitialized) throw new Error('mint not initialized');
         console.log("NFT Funds:" + customerAccount.amount)
         return (customerAccount.amount > 0);
     } catch (e){
