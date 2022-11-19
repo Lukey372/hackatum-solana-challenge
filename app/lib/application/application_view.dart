@@ -64,7 +64,7 @@ class _ApplicationViewState extends State<ApplicationView> {
                             width: MediaQuery.of(context).size.width,
                             child: Center(
                                 child: QrImage(
-                                  data: "solana:https://select-pizzapay-niclasschuemann.vercel.app/api/user",
+                                  data: "solana:https://select-pizzapay-niclasschuemann.vercel.app/api/user?price=$totalPrice",
                                   version: QrVersions.auto,
                                   size: 300.0,
                                 ),
