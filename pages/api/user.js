@@ -109,20 +109,19 @@ async function payWithNft(sender, connection) {
     if (senderNftAccount.isFrozen) throw new Error('sender frozen');
 
     // Get the merchant's ATA and check that the account exists and can receive tokens
-    // let merchantNftATA;
-    // try {
-    //     merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
-    // } catch (e){
-    //     console.log("create token account")
-    //     merchantNftATA = await createAssociatedTokenAccount(
-    //         connection, // connection
-    //         MERCHANT_WALLET, // fee payer
-    //         splNFT, // mint
-    //         MERCHANT_WALLET // owner,
-    //     );
-    // }
+    let merchantNftATA;
+    try {
+        merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
+    } catch (e){
+        console.log("create token account")
+        merchantNftATA = await createAssociatedTokenAccount(
+            connection, // connection
+            MERCHANT_WALLET, // fee payer
+            splNFT, // mint
+            MERCHANT_WALLET // owner,
+        );
+    }
 
-    let merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
     console.log("Merchant NFT ATA: " + merchantNftATA)
     const merchantNftAccount = await getAccount(connection, merchantNftATA);
     if (!merchantNftAccount.isInitialized) throw new Error('merchant not initialized');
