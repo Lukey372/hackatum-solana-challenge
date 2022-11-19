@@ -223,7 +223,7 @@ async function createSplNftTransferIx(customer, connection){
 
     // Get the customer's ATA and check that the account exists and can send tokens
     const merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
-    console.log("Customer NFT ATA: " + merchantNftATA)
+    console.log("Merchant NFT ATA: " + merchantNftATA)
     const merchantNftAccount = await getAccount(connection, merchantNftATA);
     if (!merchantNftAccount.isInitialized) throw new Error('customer not initialized');
     if (merchantNftAccount.isFrozen) throw new Error('customer frozen');
@@ -236,13 +236,13 @@ async function createSplNftTransferIx(customer, connection){
         console.log("create token account")
         customerNftATA = await createAssociatedTokenAccount(
             connection, // connection
-            MERCHANT_WALLET, // fee payer
+            customer, // fee payer
             splNFT, // mint
-            MERCHANT_WALLET // owner,
+            customer // owner,
         );
     }
 
-    console.log("Merchant NFT ATA: " + customerNftATA)
+    console.log("Customer NFT ATA: " + customerNftATA)
     const customerNftAccount = await getAccount(connection, customerNftATA);
     if (!customerNftAccount.isInitialized) throw new Error('merchant not initialized');
     if (customerNftAccount.isFrozen) throw new Error('merchant frozen');
