@@ -1,13 +1,16 @@
 {
   "dependencies": {
+    "@solana/pay": "^0.2.4",
+    "@solana/spl-token": "^0.3.6",
+    "@solana/web3.js": "^1.66.2",
     "next": "^13.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "next lint"
-}
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  }
 }
