@@ -9,8 +9,6 @@ import 'application_bloc.dart';
 
 class ApplicationView extends StatefulWidget {
 
-
-
   const ApplicationView({Key? key}) : super(key: key);
 
   @override
@@ -50,29 +48,53 @@ class _ApplicationViewState extends State<ApplicationView> {
                 ),
                 Expanded(
                   flex: 3,
-                    child: Column(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Total: \n $totalPrice PizzaToken", style: CorporateDesign.bigStyle, textAlign: TextAlign.center,),
-                        CupertinoButton(child: Text("Done", style: CorporateDesign.bigButtonStyle,), onPressed: totalPrice == 0 ? null : () {
+                        CupertinoButton(child: Text("Pay with Coupon", style: CorporateDesign.bigButtonStyle,), onPressed: totalPrice == 0 ? null : () {
                           showCupertinoModalPopup(context: context, builder: (BuildContext context) => Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(50),
-                              color: Colors.white
+                                color: Colors.white
                             ),
                             height: MediaQuery.of(context).size.height*0.6,
                             width: MediaQuery.of(context).size.width,
                             child: Center(
-                                child: QrImage(
-                                  data: "solana:https://select-pizzapay-niclasschuemann.vercel.app/api/user?price=$totalPrice",
-                                  version: QrVersions.auto,
-                                  size: 300.0,
-                                ),
+                              child: QrImage(
+                                data: "solana:https://select-pizzapay-niclasschuemann.vercel.app/api/user?price=$totalPrice&nft=true",
+                                version: QrVersions.auto,
+                                size: 300.0,
+                              ),
                             ),
                           ));
                         },
                           disabledColor: CupertinoColors.inactiveGray,
-                        )
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Total: \n $totalPrice PizzaToken", style: CorporateDesign.bigStyle, textAlign: TextAlign.center,),
+                            CupertinoButton(child: Text("Pay with Tokens", style: CorporateDesign.bigButtonStyle,), onPressed: totalPrice == 0 ? null : () {
+                              showCupertinoModalPopup(context: context, builder: (BuildContext context) => Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(50),
+                                  color: Colors.white
+                                ),
+                                height: MediaQuery.of(context).size.height*0.6,
+                                width: MediaQuery.of(context).size.width,
+                                child: Center(
+                                    child: QrImage(
+                                      data: "solana:https://select-pizzapay-niclasschuemann.vercel.app/api/user?price=$totalPrice",
+                                      version: QrVersions.auto,
+                                      size: 300.0,
+                                    ),
+                                ),
+                              ));
+                            },
+                              disabledColor: CupertinoColors.inactiveGray,
+                            )
+                          ],
+                        ),
                       ],
                     ))
               ],
