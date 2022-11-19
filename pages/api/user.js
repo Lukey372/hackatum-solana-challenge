@@ -51,7 +51,7 @@ const post = async (request, response) => {
 };
 
 async function createSplTransferIx(sender, connection) {
-  const senderInfo = await Connection.getAccountInfo(sender);
+  const senderInfo = await connection.getAccountInfo(sender);
   if (!senderInfo) throw new Error('sender not found');
 
   // Get the sender's ATA and check that the account exists and can send tokens
