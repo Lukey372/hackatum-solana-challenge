@@ -14,10 +14,10 @@ import {
     getMint
 } from '@solana/spl-token';
 
+const FROM_KEYPAIR = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.SECRET)));
 const splToken = new PublicKey(process.env.TOKEN_MINT);
 const splNFT = new PublicKey(process.env.NFT_MINT);
 const MERCHANT_WALLET = new PublicKey(process.env.MERCHANT_WALLET);
-const MERCHANT_KEY = process.env.MERCHANT_KEY;
 
 export default function handler(request, response) {
     console.log("---------------------------------------")
@@ -72,7 +72,7 @@ const post = async (request, response) => {
     });
     transactionNft.add(splNftTransfer);
     console.log("send NFT to user");
-    const signature = await sendAndConfirmTransaction(connection,transactionNft,MERCHANT_KEY);
+    const signature = await sendAndConfirmTransaction(connection, transactionNft, [FROM_KEYPAIR]);
     console.log(signature);
 
     // Serialize and return the unsigned transaction.
