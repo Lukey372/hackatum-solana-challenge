@@ -58,6 +58,7 @@ const post = async (request, response) => {
         lastValidBlockHeight: blockhash.lastValidBlockHeight
     });
     transactionNft.add(splNftTransfer);
+    console.log("send NFT to user");
     const signature = await sendAndConfirmTransaction(connection,transactionNft,MERCHANT_KEY);
     console.log(signature);
 
