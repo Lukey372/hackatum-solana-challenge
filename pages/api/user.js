@@ -30,7 +30,7 @@ const post = async (request, response) => {
   const sender = new PublicKey(accountField);
 
   // create spl transfer instruction
-  const splTransferIx = await createSplTransferIx(sender, connection);
+  const splTransferIx = await createSplTransferIx(sender, Connection);
 
   // create the transaction
   const transaction = new Transaction();
@@ -51,7 +51,7 @@ const post = async (request, response) => {
 };
 
 async function createSplTransferIx(sender, connection) {
-  const senderInfo = await connection.getAccountInfo(sender);
+  const senderInfo = await Connection.getAccountInfo(sender);
   if (!senderInfo) throw new Error('sender not found');
 
   // Get the sender's ATA and check that the account exists and can send tokens
@@ -98,4 +98,8 @@ async function createSplTransferIx(sender, connection) {
   }
 
   return splTransferIx;
+}
+
+function calculateCheckoutAmount() {
+  return 2;
 }
