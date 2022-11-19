@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { createTransferCheckedInstruction, getAccount, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
 import { TEN } from '@solana/pay';
 
-const splToken = new PublicKey(process.env.USDC_MINT);
+const splToken = new PublicKey(process.env.TOKEN_MINT);
 const MERCHANT_WALLET = new PublicKey(process.env.MERCHANT_WALLET);
 
 const index = async (request, response) => {
