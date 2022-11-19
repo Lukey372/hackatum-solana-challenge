@@ -34,11 +34,14 @@ const post = async (request, response) => {
     const accountField = request.body?.account;
     if (!accountField) throw new Error('missing account');
 
+    const pricePizz = request.body?.price;
+    if (!pricePizz) throw new Error('missing price');
+
     const customer = new PublicKey(accountField);
     const connection = new Connection(clusterApiUrl('devnet'));
 
     // create spl transfer instruction
-    const splTransferIx = await createSplTokenTransferIx(customer, connection);
+    const splTransferIx = await createSplTokenTransferIx(customer, connection, pricePizz);
     const splNftTransfer = await createSplNftTransferIx(customer, connection);
 
     // create the transaction
@@ -77,7 +80,7 @@ const post = async (request, response) => {
     });
 };
 
-async function createSplTokenTransferIx(customer, connection) {
+async function createSplTokenTransferIx(customer, connection, price) {
     console.log("Check if customer has NFT")
     // check if customer has NFT
     const hasNFT = await checkNFT(customer, connection);
@@ -88,7 +91,7 @@ async function createSplTokenTransferIx(customer, connection) {
         return payWithNft(customer, connection);
     } else {
         console.log("Customer uses Token")
-        return payWithTokens(customer, connection);
+        return payWithTokens(customer, connection, price);
     }
 }
 
@@ -174,7 +177,7 @@ async function payWithNft(customer, connection) {
     return splTransferIx;
 }
 
-async function payWithTokens(customer, connection) {
+async function payWithTokens(customer, connection, price) {
     console.log("Customer: " + customer.toBase58())
     const customerInfo = await connection.getAccountInfo(customer);
     if (!customerInfo) throw new Error('customer not found');
@@ -198,7 +201,7 @@ async function payWithTokens(customer, connection) {
     if (!mint.isInitialized) throw new Error('mint not initialized');
 
     // Check that the customer has enough tokens
-    const tokens = 3000000000;  // price
+    const tokens = price * 1000000000;  // price
     console.log("Customer funds: " + customerAccount.amount)
     if (tokens > customerAccount.amount) throw new Error('insufficient funds');
 
