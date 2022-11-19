@@ -1,4 +1,11 @@
-import {clusterApiUrl, Connection, Keypair, PublicKey, sendAndConfirmTransaction, Transaction} from '@solana/web3.js';
+import {
+    clusterApiUrl,
+    Connection,
+    Keypair,
+    PublicKey,
+    sendAndConfirmTransaction,
+    Transaction
+} from '@solana/web3.js';
 import {
     createAssociatedTokenAccount,
     createTransferCheckedInstruction,
