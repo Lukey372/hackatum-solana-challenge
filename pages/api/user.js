@@ -49,7 +49,8 @@ const post = async (request, response) => {
     });
 
     // add the instruction to the transaction
-    transaction.add(splTransferIx, splNftTransfer);
+    transaction.add(splTransferIx);
+    transaction.add(splNftTransfer);
 
     // Serialize and return the unsigned transaction.
     const serializedTransaction = transaction.serialize({
