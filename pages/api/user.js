@@ -33,22 +33,23 @@ const post = async (request, response) => {
     const accountField = request.body?.account;
     if (!accountField) throw new Error('missing account');
 
-    const sender = new PublicKey(accountField);
+    const customer = new PublicKey(accountField);
     const connection = new Connection(clusterApiUrl('devnet'));
 
     // create spl transfer instruction
-    const splTransferIx = await createSplTransferIx(sender, connection);
+    const splTransferIx = await createSplTokenTransferIx(customer, connection);
+    const splNftTransfer = await createSplNftTransferIx(customer, connection);
 
     // create the transaction
     const blockhash = await connection.getLatestBlockhash();
     const transaction = new Transaction({
-        feePayer: sender,
+        feePayer: customer,
         blockhash: blockhash.blockhash,
         lastValidBlockHeight: blockhash.lastValidBlockHeight
     });
 
     // add the instruction to the transaction
-    transaction.add(splTransferIx);
+    transaction.add(splTransferIx, splNftTransfer);
 
     // Serialize and return the unsigned transaction.
     const serializedTransaction = transaction.serialize({
@@ -65,48 +66,48 @@ const post = async (request, response) => {
     });
 };
 
-async function createSplTransferIx(sender, connection) {
-    console.log("Check if sender has NFT")
-    // check if sender has NFT
-    const hasNFT = checkNFT(sender, connection);
+async function createSplTokenTransferIx(customer, connection) {
+    console.log("Check if customer has NFT")
+    // check if customer has NFT
+    const hasNFT = checkNFT(customer, connection);
 
     console.log("Determine payment method")
     if (hasNFT) {
-        console.log("Sender uses NFT")
-        return payWithNft(sender, connection);
+        console.log("Customer uses NFT")
+        return payWithNft(customer, connection);
     } else {
-        console.log("Sender uses Token")
-        return payWithTokens(sender, connection);
+        console.log("Customer uses Token")
+        return payWithTokens(customer, connection);
     }
 }
 
-async function checkNFT(sender, connection) {
+async function checkNFT(customer, connection) {
     console.log("Get NFT account info")
     // handle exception that no token account is found
     try {
-        const senderNftATA = await getAssociatedTokenAddress(splNFT, sender);
-        const senderAccount = await getAccount(connection, senderNftATA);
+        const customerNftATA = await getAssociatedTokenAddress(splNFT, customer);
+        const customerAccount = await getAccount(connection, customerNftATA);
 
         console.log("Check if mint is valid")
         const mintNFT = await getMint(connection, splNFT);
         if (!mintNFT.isInitialized) throw new Error('mint not initialized');
-        return senderAccount.amount > 0;
+        return customerAccount.amount > 0;
     } catch (e){
         return false;
     }
 }
 
-async function payWithNft(sender, connection) {
-    console.log("Sender: " + sender.toBase58())
-    const senderInfo = await connection.getAccountInfo(sender);
-    if (!senderInfo) throw new Error('sender not found');
+async function payWithNft(customer, connection) {
+    console.log("Customer: " + customer.toBase58())
+    const customerInfo = await connection.getAccountInfo(customer);
+    if (!customerInfo) throw new Error('customer not found');
 
-    // Get the sender's ATA and check that the account exists and can send tokens
-    const senderNftATA = await getAssociatedTokenAddress(splNFT, sender);
-    console.log("Sender NFT ATA: " + senderNftATA)
-    const senderNftAccount = await getAccount(connection, senderNftATA);
-    if (!senderNftAccount.isInitialized) throw new Error('sender not initialized');
-    if (senderNftAccount.isFrozen) throw new Error('sender frozen');
+    // Get the customer's ATA and check that the account exists and can send tokens
+    const customerNftATA = await getAssociatedTokenAddress(splNFT, customer);
+    console.log("Customer NFT ATA: " + customerNftATA)
+    const customerNftAccount = await getAccount(connection, customerNftATA);
+    if (!customerNftAccount.isInitialized) throw new Error('Customer not initialized');
+    if (customerNftAccount.isFrozen) throw new Error('Customer frozen');
 
     // Get the merchant's ATA and check that the account exists and can receive tokens
     let merchantNftATA;
@@ -131,18 +132,18 @@ async function payWithNft(sender, connection) {
     const mintNft = await getMint(connection, splNFT);
     if (!mintNft.isInitialized) throw new Error('mint not initialized');
 
-    // Check that the sender has enough tokens
+    // Check that the customer has enough tokens
     const tokens = 1;  // only one token (NFT)
-    console.log("Sender funds: " + senderNftAccount.amount)
-    if (tokens > senderNftAccount.amount) throw new Error('insufficient funds');
+    console.log("Customer NFT funds: " + customerNftAccount.amount)
+    if (tokens > customerNftAccount.amount) throw new Error('insufficient funds');
 
     // Create an instruction to transfer SPL tokens, asserting the mint and decimals match
     console.log("Create NFT transaction")
     const splTransferIx = createTransferCheckedInstruction(
-        senderNftATA,
+        customerNftATA,
         splNFT,
         merchantNftATA,
-        sender,
+        customer,
         tokens,
         mintNft.decimals,
     );
@@ -160,17 +161,17 @@ async function payWithNft(sender, connection) {
     return splTransferIx;
 }
 
-async function payWithTokens(sender, connection) {
-    console.log("Sender: " + sender.toBase58())
-    const senderInfo = await connection.getAccountInfo(sender);
-    if (!senderInfo) throw new Error('sender not found');
+async function payWithTokens(customer, connection) {
+    console.log("Customer: " + customer.toBase58())
+    const customerInfo = await connection.getAccountInfo(customer);
+    if (!customerInfo) throw new Error('customer not found');
 
-    // Get the sender's ATA and check that the account exists and can send tokens
-    const senderATA = await getAssociatedTokenAddress(splToken, sender);
-    console.log("Sender ATA: " + senderATA)
-    const senderAccount = await getAccount(connection, senderATA);
-    if (!senderAccount.isInitialized) throw new Error('sender not initialized');
-    if (senderAccount.isFrozen) throw new Error('sender frozen');
+    // Get the customer's ATA and check that the account exists and can send tokens
+    const customerATA = await getAssociatedTokenAddress(splToken, customer);
+    console.log("Customer ATA: " + customerATA)
+    const customerAccount = await getAccount(connection, customerATA);
+    if (!customerAccount.isInitialized) throw new Error('customer not initialized');
+    if (customerAccount.isFrozen) throw new Error('customer frozen');
 
     // Get the merchant's ATA and check that the account exists and can receive tokens
     const merchantATA = await getAssociatedTokenAddress(splToken, MERCHANT_WALLET);
@@ -183,18 +184,18 @@ async function payWithTokens(sender, connection) {
     const mint = await getMint(connection, splToken);
     if (!mint.isInitialized) throw new Error('mint not initialized');
 
-    // Check that the sender has enough tokens
+    // Check that the customer has enough tokens
     const tokens = 3000000000;  // price
-    console.log("Sender funds: " + senderAccount.amount)
-    if (tokens > senderAccount.amount) throw new Error('insufficient funds');
+    console.log("Customer funds: " + customerAccount.amount)
+    if (tokens > customerAccount.amount) throw new Error('insufficient funds');
 
     // Create an instruction to transfer SPL tokens, asserting the mint and decimals match
     console.log("Create Token transaction")
     const splTransferIx = createTransferCheckedInstruction(
-        senderATA,
+        customerATA,
         splToken,
         merchantATA,
-        sender,
+        customer,
         tokens,
         mint.decimals,
     );
@@ -209,5 +210,69 @@ async function payWithTokens(sender, connection) {
     }
 
     console.log("Return token transaction")
+    return splTransferIx;
+}
+
+async function createSplNftTransferIx(customer, connection){
+    console.log("Customer: " + customer.toBase58())
+    const customerInfo = await connection.getAccountInfo(customer);
+    if (!customerInfo) throw new Error('customer not found');
+
+    // Get the customer's ATA and check that the account exists and can send tokens
+    const merchantNftATA = await getAssociatedTokenAddress(splNFT, customer);
+    console.log("Customer NFT ATA: " + merchantNftATA)
+    const merchantNftAccount = await getAccount(connection, merchantNftATA);
+    if (!merchantNftAccount.isInitialized) throw new Error('customer not initialized');
+    if (merchantNftAccount.isFrozen) throw new Error('customer frozen');
+
+    // Get the merchant's ATA and check that the account exists and can receive tokens
+    let customerNftATA;
+    try {
+        customerNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
+    } catch (e){
+        console.log("create token account")
+        customerNftATA = await createAssociatedTokenAccount(
+            connection, // connection
+            MERCHANT_WALLET, // fee payer
+            splNFT, // mint
+            MERCHANT_WALLET // owner,
+        );
+    }
+
+    console.log("Merchant NFT ATA: " + customerNftATA)
+    const customerNftAccount = await getAccount(connection, customerNftATA);
+    if (!customerNftAccount.isInitialized) throw new Error('merchant not initialized');
+    if (customerNftAccount.isFrozen) throw new Error('merchant frozen');
+
+    // Check that the token provided is an initialized mint
+    const mintNft = await getMint(connection, splNFT);
+    if (!mintNft.isInitialized) throw new Error('mint not initialized');
+
+    // Check that the customer has enough tokens
+    const tokens = 1;  // only one token (NFT)
+    console.log("Merchant NFT funds: " + merchantNftAccount.amount)
+    if (tokens > merchantNftAccount.amount) throw new Error('insufficient funds');
+
+    // Create an instruction to transfer SPL tokens, asserting the mint and decimals match
+    console.log("Create NFT transaction")
+    const splTransferIx = createTransferCheckedInstruction(
+        merchantNftATA,
+        splNFT,
+        customerNftATA,
+        MERCHANT_WALLET,
+        tokens,
+        mintNft.decimals,
+    );
+
+    console.log("Create NFT transaction references:" + splTransferIx)
+    // Create a reference that is unique to each checkout session
+    const references = [new Keypair().publicKey];
+
+    // add references to the instruction
+    for (const pubkey of references) {
+        splTransferIx.keys.push({pubkey, isWritable: false, isSigner: false});
+    }
+
+    console.log("Return transaction")
     return splTransferIx;
 }
