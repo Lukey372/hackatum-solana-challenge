@@ -35,23 +35,29 @@ const post = async (request, response) => {
   const splTransferIx = await createSplTransferIx(sender, connection);
 
   // create the transaction
-  const transaction = new Transaction();
+  const blockhash = await connection.getLatestBlockhash();
+  const transaction = new Transaction({
+    feePayer:sender,
+    blockhash:blockhash.blockhash,
+    lastValidBlockHeight:blockhash.lastValidBlockHeight
+  });
 
   // add the instruction to the transaction
   transaction.add(splTransferIx);
-  console.log("test1")
 
   // Serialize and return the unsigned transaction.
   const serializedTransaction = transaction.serialize({
     verifySignatures: false,
     requireAllSignatures: false,
   });
-  console.log("test2")
 
   const base64Transaction = serializedTransaction.toString('base64');
   const message = 'Thank you for your purchase of ExiledApe #518';
 
-  response.status(200).send({ transaction: base64Transaction, message });
+  response.status(200).send({
+    transaction: base64Transaction,
+    message,
+  });
 };
 
 async function createSplTransferIx(sender, connection) {
@@ -78,7 +84,8 @@ async function createSplTransferIx(sender, connection) {
   if (!mint.isInitialized) throw new Error('mint not initialized');
 
   // Check that the sender has enough tokens
-  const tokens = 3;
+  const tokens = 3000000000;  // price
+  console.log("Sender funds: " + senderAccount.amount)
   if (tokens > senderAccount.amount) throw new Error('insufficient funds');
 
   // Create an instruction to transfer SPL tokens, asserting the mint and decimals match
