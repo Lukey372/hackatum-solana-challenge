@@ -44,6 +44,9 @@ const post = async (request, response) => {
     const pricePizz = request.body?.price;
     if (!pricePizz) throw new Error('missing price');
 
+    const useNft = request.body?.nft;
+    if (!useNft) throw new Error('missing use of NFT');
+
     const customer = new PublicKey(accountField);
     const connection = new Connection(clusterApiUrl('devnet'));
 
