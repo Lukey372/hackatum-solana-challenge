@@ -211,7 +211,7 @@ async function payWithTokens(customer, connection) {
     if (!mint.isInitialized) throw new Error('mint not initialized');
 
     // Check that the customer has enough tokens
-    const tokens = price * 1000000000;  // price
+    const tokens =  1000000000;  // price
     console.log("Customer funds: " + customerAccount.amount)
     if (tokens > customerAccount.amount) throw new Error('insufficient funds');
 
