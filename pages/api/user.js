@@ -92,14 +92,14 @@ async function payWithNft(sender, connection) {
     if (!senderInfo) throw new Error('sender not found');
 
     // Get the sender's ATA and check that the account exists and can send tokens
-    const senderNftATA = await getAssociatedTokenAddress(splToken, sender);
+    const senderNftATA = await getAssociatedTokenAddress(splNFT, sender);
     console.log("Sender NFT ATA: " + senderNftATA)
     const senderNftAccount = await getAccount(connection, senderNftATA);
     if (!senderNftAccount.isInitialized) throw new Error('sender not initialized');
     if (senderNftAccount.isFrozen) throw new Error('sender frozen');
 
     // Get the merchant's ATA and check that the account exists and can receive tokens
-    const merchantNftATA = await getAssociatedTokenAddress(splToken, MERCHANT_WALLET);
+    const merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
     console.log("Merchant NFT ATA: " + merchantNftATA)
     const merchantNftAccount = await getAccount(connection, merchantNftATA);
     if (!merchantNftAccount.isInitialized) throw new Error('merchant not initialized');
