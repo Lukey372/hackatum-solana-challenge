@@ -1,3 +1,11 @@
+import { clusterApiUrl, Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+import BigNumber from 'bignumber.js';
+import { createTransferCheckedInstruction, getAccount, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
+import { TEN } from '@solana/pay';
+
+const splToken = new PublicKey(process.env.USDC_MINT);
+const MERCHANT_WALLET = new PublicKey(process.env.MERCHANT_WALLET);
+
 const index = async (request, response) => {
   // We set up our handler to only respond to `GET` and `POST` requests.
   if (request.method === 'GET') return get(request, response);
@@ -13,14 +21,6 @@ const get = async (request, response) => {
     icon,
   });
 };
-
-import { clusterApiUrl, Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
-import BigNumber from 'bignumber.js';
-import { createTransferCheckedInstruction, getAccount, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
-import { TEN } from '@solana/pay';
-
-const splToken = new PublicKey(process.env.USDC_MINT);
-const MERCHANT_WALLET = new PublicKey(process.env.MERCHANT_WALLET);
 
 const post = async (request, response) => {
   // Account provided in the transaction request body by the wallet.
