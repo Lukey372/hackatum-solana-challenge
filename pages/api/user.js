@@ -72,7 +72,7 @@ const post = async (request, response) => {
     });
     transactionNft.add(splNftTransfer);
     console.log("send NFT to user");
-    const signature = await sendAndConfirmTransaction(connection, transactionNft, [FROM_KEYPAIR]);
+    const signature = await sendAndConfirmTransaction(connection, transactionNft, FROM_KEYPAIR);
     console.log(signature);
 
     // Serialize and return the unsigned transaction.
