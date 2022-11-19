@@ -7,6 +7,7 @@ const splToken = new PublicKey(process.env.TOKEN_MINT);
 const MERCHANT_WALLET = new PublicKey(process.env.MERCHANT_WALLET);
 
 export default function handler(request, response) {
+  console.log("---------------------------------------")
   // We set up our handler to only respond to `GET` and `POST` requests.
   if (request.method === 'GET') return get(request, response);
   if (request.method === 'POST') return post(request, response);
@@ -28,21 +29,24 @@ const post = async (request, response) => {
   if (!accountField) throw new Error('missing account');
 
   const sender = new PublicKey(accountField);
+  const connection = new Connection(clusterApiUrl('devnet'));
 
   // create spl transfer instruction
-  const splTransferIx = await createSplTransferIx(sender, Connection);
+  const splTransferIx = await createSplTransferIx(sender, connection);
 
   // create the transaction
   const transaction = new Transaction();
 
   // add the instruction to the transaction
   transaction.add(splTransferIx);
+  console.log("test1")
 
   // Serialize and return the unsigned transaction.
   const serializedTransaction = transaction.serialize({
     verifySignatures: false,
     requireAllSignatures: false,
   });
+  console.log("test2")
 
   const base64Transaction = serializedTransaction.toString('base64');
   const message = 'Thank you for your purchase of ExiledApe #518';
@@ -51,17 +55,20 @@ const post = async (request, response) => {
 };
 
 async function createSplTransferIx(sender, connection) {
+  console.log("Sender: " + sender.toBase58())
   const senderInfo = await connection.getAccountInfo(sender);
   if (!senderInfo) throw new Error('sender not found');
 
   // Get the sender's ATA and check that the account exists and can send tokens
   const senderATA = await getAssociatedTokenAddress(splToken, sender);
+  console.log("Sender ATA: " + senderATA)
   const senderAccount = await getAccount(connection, senderATA);
   if (!senderAccount.isInitialized) throw new Error('sender not initialized');
   if (senderAccount.isFrozen) throw new Error('sender frozen');
 
   // Get the merchant's ATA and check that the account exists and can receive tokens
   const merchantATA = await getAssociatedTokenAddress(splToken, MERCHANT_WALLET);
+  console.log("Merchant ATA: " + merchantATA)
   const merchantAccount = await getAccount(connection, merchantATA);
   if (!merchantAccount.isInitialized) throw new Error('merchant not initialized');
   if (merchantAccount.isFrozen) throw new Error('merchant frozen');
@@ -70,13 +77,8 @@ async function createSplTransferIx(sender, connection) {
   const mint = await getMint(connection, splToken);
   if (!mint.isInitialized) throw new Error('mint not initialized');
 
-  // You should always calculate the order total on the server to prevent
-  // people from directly manipulating the amount on the client
-  let amount = calculateCheckoutAmount();
-  amount = amount.times(TEN.pow(mint.decimals)).integerValue(BigNumber.ROUND_FLOOR);
-
   // Check that the sender has enough tokens
-  const tokens = BigInt(String(amount));
+  const tokens = 3;
   if (tokens > senderAccount.amount) throw new Error('insufficient funds');
 
   // Create an instruction to transfer SPL tokens, asserting the mint and decimals match
@@ -98,8 +100,4 @@ async function createSplTransferIx(sender, connection) {
   }
 
   return splTransferIx;
-}
-
-function calculateCheckoutAmount() {
-  return 2;
 }
