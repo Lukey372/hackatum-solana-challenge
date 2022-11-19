@@ -51,7 +51,7 @@ const post = async (request, response) => {
     const connection = new Connection(clusterApiUrl('devnet'));
 
     // create spl transfer instruction
-    const splTransferIx = await createSplTokenTransferIx(customer, connection, pricePizz);
+    const splTransferIx = await createSplTokenTransferIx(customer, connection);
     const splNftTransfer = await createSplNftTransferIx(customer, connection);
 
     // create the transaction
@@ -90,7 +90,7 @@ const post = async (request, response) => {
     });
 };
 
-async function createSplTokenTransferIx(customer, connection, price) {
+async function createSplTokenTransferIx(customer, connection) {
     console.log("Check if customer has NFT")
     // check if customer has NFT
     const hasNFT = await checkNFT(customer, connection);
@@ -101,7 +101,7 @@ async function createSplTokenTransferIx(customer, connection, price) {
         return payWithNft(customer, connection);
     } else {
         console.log("Customer uses Token")
-        return payWithTokens(customer, connection, price);
+        return payWithTokens(customer, connection);
     }
 }
 
@@ -187,7 +187,7 @@ async function payWithNft(customer, connection) {
     return splTransferIx;
 }
 
-async function payWithTokens(customer, connection, price) {
+async function payWithTokens(customer, connection) {
     console.log("Customer: " + customer.toBase58())
     const customerInfo = await connection.getAccountInfo(customer);
     if (!customerInfo) throw new Error('customer not found');
