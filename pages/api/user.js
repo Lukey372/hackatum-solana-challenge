@@ -65,7 +65,7 @@ const post = async (request, response) => {
     // add the instruction to the transaction
     transaction.add(splTransferIx);
 
-    if(!hasNFT){
+    if (!hasNFT) {
         const splNftTransfer = await createSplNftTransferIx(customer, connection);
         console.log("Sent reward NFT to customer.")
         const transactionNft = new Transaction({
@@ -121,7 +121,7 @@ async function checkNFT(customer, connection) {
         if (!mintNFT.isInitialized) throw new Error('mint not initialized');
         console.log("NFT Funds:" + customerAccount.amount)
         return (customerAccount.amount > 0);
-    } catch (e){
+    } catch (e) {
         return false;
     }
     return false;
@@ -143,7 +143,7 @@ async function payWithNft(customer, connection) {
     let merchantNftATA;
     try {
         merchantNftATA = await getAssociatedTokenAddress(splNFT, MERCHANT_WALLET);
-    } catch (e){
+    } catch (e) {
         console.log("create token account")
         merchantNftATA = await createAssociatedTokenAccount(
             connection, // connection
@@ -215,7 +215,7 @@ async function payWithTokens(customer, connection) {
     if (!mint.isInitialized) throw new Error('mint not initialized');
 
     // Check that the customer has enough tokens
-    const tokens =  1000000000;  // price
+    const tokens = 1000000000;  // price
     console.log("Customer funds: " + customerAccount.amount)
     if (tokens > customerAccount.amount) throw new Error('insufficient funds');
 
@@ -243,7 +243,7 @@ async function payWithTokens(customer, connection) {
     return splTransferIx;
 }
 
-async function createSplNftTransferIx(customer, connection){
+async function createSplNftTransferIx(customer, connection) {
     console.log("Customer: " + customer.toBase58())
     const customerInfo = await connection.getAccountInfo(customer);
     if (!customerInfo) throw new Error('customer not found');
@@ -259,7 +259,7 @@ async function createSplNftTransferIx(customer, connection){
     let customerNftATA;
     try {
         customerNftATA = await getAssociatedTokenAddress(splNFT, customer);
-    } catch (e){
+    } catch (e) {
         console.log("create token account")
         customerNftATA = await createAssociatedTokenAccount(
             connection, // connection
