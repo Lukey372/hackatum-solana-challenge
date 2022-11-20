@@ -30,7 +30,7 @@ export default function handler(request, response) {
 
 const get = async (request, response) => {
     const label = 'Pizza del SOL';
-    const icon = 'https://imgur.com/TXGuGFM';
+    const icon = 'https://i.imgur.com/Qed0oFt.jpeg';
     response.status(200).send({
         label,
         icon,
