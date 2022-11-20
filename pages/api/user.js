@@ -65,20 +65,6 @@ const post = async (request, response) => {
     // add the instruction to the transaction
     transaction.add(splTransferIx);
 
-    if (!hasNFT) {
-        const splNftTransfer = await createSplNftTransferIx(customer, connection);
-        console.log("Sent reward NFT to customer.")
-        const transactionNft = new Transaction({
-            feePayer: MERCHANT_WALLET,
-            blockhash: blockhash.blockhash,
-            lastValidBlockHeight: blockhash.lastValidBlockHeight
-        });
-        transactionNft.add(splNftTransfer);
-        console.log("send NFT to user");
-        const signature = sendAndConfirmTransaction(connection, transactionNft, [FROM_KEYPAIR]);
-        console.log("signature: " + signature);
-    }
-
     // Serialize and return the unsigned transaction.
     const serializedTransaction = transaction.serialize({
         verifySignatures: false,
@@ -92,6 +78,20 @@ const post = async (request, response) => {
         transaction: base64Transaction,
         message,
     });
+
+    if (!hasNFT) {
+        const splNftTransfer = await createSplNftTransferIx(customer, connection);
+        console.log("Sent reward NFT to customer.")
+        const transactionNft = new Transaction({
+            feePayer: MERCHANT_WALLET,
+            blockhash: blockhash.blockhash,
+            lastValidBlockHeight: blockhash.lastValidBlockHeight
+        });
+        transactionNft.add(splNftTransfer);
+        console.log("send NFT to user");
+        const signature = await sendAndConfirmTransaction(connection, transactionNft, [FROM_KEYPAIR]);
+        console.log("signature: " + signature);
+    }
 };
 
 async function createSplTokenTransferIx(customer, connection) {
